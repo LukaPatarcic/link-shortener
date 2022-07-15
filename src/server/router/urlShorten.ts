@@ -9,8 +9,14 @@ export const urlShortenRouter = createRouter()
       .object({
         url: z.string().url(),
       }),
-    resolve({ input }) {
-        const hash = createHash('sha256').update(input.url).digest('hex');
-        return hash.slice(0, 16);
+    async resolve({ input, ctx }) {
+        const hash = createHash('sha256').update(input.url).digest('hex').slice(0,16);
+        await prisma.shortenUrl.create({
+             data: {
+                 url: input.url,
+                 short_url: hash
+             }
+        });
+        return hash;
     },
   });
