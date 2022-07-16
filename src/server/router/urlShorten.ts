@@ -1,32 +1,42 @@
-import { createRouter } from "./context";
-import { z } from "zod";
 import { createHash } from 'crypto';
-import { prisma} from "../db/client";
-import normalizeUrl from 'normalize-url';
 
-export const urlShortenRouter = createRouter()
-  .mutation("shorten", {
-    input: z
-      .object({
-        url: z.string().url(),
-      }),
-    async resolve({ input, ctx }) {
+import normalizeUrl from 'normalize-url';
+import { z } from 'zod';
+
+import { prisma } from '@server/db/client';
+
+import { createRouter } from './context';
+
+export const urlShortenRouter = createRouter().mutation('shorten', {
+    input: z.object({
+        url: z.string().url().trim(),
+    }),
+    async resolve({ input }) {
         const normalizedUrl = normalizeUrl(input.url);
-        const hash = createHash('sha256').update(normalizedUrl).digest('hex').slice(0,16);
-        const urlExists = await prisma.shortenUrl.findUnique({
-            where: {
-                 short_url: hash
-            }
-        });
-        if(!urlExists) {
-            await prisma.shortenUrl.create({
-                data: {
-                    url: normalizedUrl,
-                    short_url: hash
-                }
-            });
+        const hash = hashUrl(normalizedUrl);
+        const urlExists = await findByShortUrl(hash);
+        if (!urlExists) {
+            await createEntity(normalizedUrl, hash);
         }
 
         return hash;
     },
-  });
+});
+
+const hashUrl = (url: string) =>
+    createHash('sha256').update(url).digest('hex').slice(0, 16);
+
+const findByShortUrl = (shortUrl: string) =>
+    prisma.shortenUrl.findUnique({
+        where: {
+            short_url: shortUrl,
+        },
+    });
+
+const createEntity = (url: string, short_url: string) =>
+    prisma.shortenUrl.create({
+        data: {
+            url,
+            short_url,
+        },
+    });
