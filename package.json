@@ -17,9 +17,11 @@
     "@trpc/react": "^9.26.0",
     "@trpc/server": "^9.26.0",
     "next": "12.2.0",
+    "normalize-url": "^7.0.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-query": "^3.39.1",
+    "react-tooltip": "^4.2.21",
     "superjson": "^1.9.1",
     "zod": "^3.17.3"
   },

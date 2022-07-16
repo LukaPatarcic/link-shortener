@@ -12,6 +12,7 @@ datasource db {
 
 model ShortenUrl {
     id Int @id @default(autoincrement())
-    url String
-    short_url String
+    url String @db.VarChar(1000)
+    short_url String @db.Char(16) @unique
+
 }
